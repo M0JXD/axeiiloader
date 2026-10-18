@@ -1,18 +1,23 @@
-# A simple Preset/IR loader for the Axe-FX II on Linux and FreeBSD
+# Axe-FX II Loader
 
-This is a simple loading/exporting utility for the Axe-FX II. It offers both the CLI app, and a GUI using GTK3.
-You do not need the CLI app to use the GUI app, they are completely separate but are built from the same back-end code.
+A simple Preset/IR loader for the Axe-FX II on Linux and FreeBSD. It offers both a CLI and a GUI.
+You do not need the CLI installed to use the GUI version, they are completely separate and standalone.
 
-I previously made a [GUI version of this utility in Flutter](https://github.com/M0JXD/axeii_loader), but at the moment the FlutterMidiCommand package it uses for the back-end has bugs on Linux. However I want to keep that version "as is" with the package (instead of replacing it with a FFI back-end), as there is the option of easily porting to other platforms in the future should the MIDI package be picked up and maintained again.
+## GUI
 
-This repo was renamed from axeii_loader_native to axeiiloader on 14/02/26 to better reflect the binary names and the fact it no longer uses the "native wrapping" library, IUP.
+The GUI should hopefully be quite obvious to use.
 
-## CLI usage
+![screenshot](assets/screenshot.png)
+
+The GUI is made using GTK3, which should integrate well with most desktop environments.
+I'm waiting to see what the likes of Cinnamon and XFCE do before porting it to GTK4.
+
+## CLI
 
 Without arguments, the CLI attempts to receive from the first preset location.
-You must specify a file with -i to change to send mode.
-If you'd prefer to set your own name for received files than the one provided by the tool, you can do so with -o.
-You can get this help text by passing -h:
+You must specify a file with `-i` to change to send mode.
+If you'd prefer to set your own name for received files than the one provided by the tool, you can do so with `-o`.
+You can get this help text by passing `-h`:
 
 ```
 ===== AXE-FX II LOADER =====
@@ -34,32 +39,16 @@ The unit type (-t option) does not autodetect, and transfers may fail if it's in
 
 ### Examples
 
-- Send a preset to the edit buffer, specifying an ALSA device string:
-`axeiiloader -d "hw:2,0" -i mypreset.syx`
+- Send a preset to the edit buffer, specifying an ALSA device string: `axeiiloader -d "hw:2,0" -i mypreset.syx`
 
-- Get a preset from location 100:
-`axeiiloader -p 100`
+- Get a preset from location 100: `axeiiloader -p 100`
 
-- Send an IR to Cabinet location 15:
-`axeiiloader -i myir.syx -p 15`
+- Send an IR to Cabinet location 15: `axeiiloader -i myir.syx -p 15`
 
-- Get an IR from Cabinet location 34:
-`axeiiloader -m -p 34`
+- Get an IR from Cabinet location 34: `axeiiloader -m -p 34`
 
-- Note: Scratchpad locations are just the ones after the last available slot, e.g. to send to scratchpad 2 on an OG/MKII:
-`axeiiloader -i myir.syx -p 102`
-
-  - And likewise on an XL:
-`axeiiloader -i myir.syx -p 1026 -t x`
-
-## GUI
-
-The GUI should hopefully be quite obvious to use. Here's a screenshot:
-
-![screenshot](assets/screenshot.png)
-
-The GUI is made using GTK3, which should integrate well with most desktop environments.
-I'm waiting to see what the likes of Cinnamon and XFCE do before porting it to GTK4.
+- Note: Scratchpads are locations after the last memory slot, e.g. to send to scratchpad 2 on an OG/MKII: `axeiiloader -i myir.syx -p 102`
+    - And likewise on an XL:  `axeiiloader -i myir.syx -p 1026 -t x`
 
 ## Building
 
@@ -73,22 +62,19 @@ By default it will build both the CLI and GUI programs, although you can specify
 
 ## License
 
-The original license was MIT (which is my preference), but this had to be changed to the GPLv2.
-When creating the first UI I realised I needed to get the MIDI device hardware strings/names.
-One option is to call and parse `amidi -l` but that is poor and not future-proof (if the output layout changes in a future version) and parsing strings in C is a nightmare. So instead the better option is to do the RawMIDI calls that amidi itself does. To do this right I essentially refactored amidi's source to just what the -l option does. This makes my code a derivative of amidi's and hence the project license had to be updated.
-An added benefit however is that the CLI version can now attempt to work out the correct device without needing to pass it.
-
-Now that a FreeBSD OSS backend has been added, all the code is dual licensed apart from the ALSA backend file which is only available under the GPL.
-When building for ALSA, the amidi derived code is needed and the final binary must be distributed as per the GPLv2.
-With the OSS backend, the amidi derived code is not used and you may optionally use/distribute under either the GPLv2 or the BSD 2 Clause.
-From my understanding I believe this does not violate the GPLv2, but if it does please make an issue and I will promptly fix.
+This project is dual licensed under the *BSD 2 Clause* and *GPLv2*.
+Some of the ALSA backend code used on Linux originates and derives from `amidi`, which is *GPLv2*.
+If you use the ALSA backend you must distribute under the *GPLv2*. With the OSS backend, the `amidi` derived code is not used and you may use/distribute under either license.
+From my understanding I believe this does not violate the *GPLv2*, but if it does please make an issue and I will promptly fix.
 
 ## Notes
 
-I have developed using Linux Mint Cinnamon 22 and FreeBSD 15 with an Axe-FX II MkII. It has also been used on Bazzite with an XL+.
-A GCC bug with -02 optimisations messes up the sysex checksum calculation, so the base is built with -01.
-When detecting MIDI devices in both the CLI and GUI versions, it will stop looking/counting after five devices.
-I can improve this to check all devices but will require reworking some aspects. Please open an issue if you need this fixed, otherwise I'm happy to leave as is.
+- This was developed on Linux Mint Cinnamon 22 and FreeBSD 15 with an Axe-FX II MkII. It has also been used on Bazzite with an XL+.
+- A GCC bug with -02 optimisations messes up the sysex checksum calculation, so the base is built with -01.
+- When detecting MIDI devices in both the CLI and GUI versions, it will stop looking/counting after five devices.
+    I can improve this to check all devices but will require reworking some aspects. Please open an issue if you need this fixed, otherwise I'm happy to leave as is.
+- I previously made a [GUI version of this utility in Flutter](https://github.com/M0JXD/axeiiloader_flutter), but for reasons detailed there this now replaces it.
+- This repo was renamed from axeii_loader_native to axeiiloader on 14/02/26 to better reflect the binary names and the fact it no longer uses the "native wrapping" library, IUP.
 
 ## Credits
 
